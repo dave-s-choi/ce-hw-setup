@@ -1,5 +1,12 @@
-# after converting the CE microdata into .rda format using anthony damico's scripts
-# we will extract and process further for usage by students in my course
+# setup_intrvw.R
+# this is a template for creating little files from the interview portion of the CE microdata, 
+# suitable for short assignments
+
+# assumes microdata has already been downloaded and converted to .rda (r data) format
+# https://github.com/ajdamico/usgsd/tree/master/Consumer%20Expenditure%20Survey
+# parts of this script have been lifted from2011_fmly_analysis_example.R by anthony damico
+
+# this would be much, much, harder without efforts of A. Damico.
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ###################################################################################################################
@@ -12,8 +19,6 @@
 ###################################################################################################################
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# this section taken from 2011_fmly_analysis_example.R by anthony damico
-# https://github.com/ajdamico/usgsd/tree/master/Consumer%20Expenditure%20Survey
 
 # turn off scientific notation in most output
 
@@ -43,6 +48,64 @@ source_https <- function(url, ...) {
   })
 }
 #######################################################
+# function: load.intrvw ( yr, prefix )
+# loads and rbinds the files designed by prefix for quarters 1x, 2, 3, 4
+# prefix: "fmli", "mtbi", "itbi"
+# yr: 10 or 11 (haven't tried with 10 yet)
+load.intrvw = function( yr, prefix ) {  
+  # add the ucc tables to R so that it can automatically look them up??
+  load( paste0( "./intrvw/", prefix, yr , "1x.rda" ) )
+  load( paste0( "./intrvw/", prefix, yr , "2.rda" ) )
+  load( paste0( "./intrvw/", prefix, yr , "3.rda" ) )
+  load( paste0( "./intrvw/", prefix, yr , "4.rda" ) )
+  load( paste0( "./intrvw/", prefix, as.numeric( yr ) + 1 , "1.rda" ) )
+  
+  # save the first quarter's data frame into a new data frame called 'fmly'
+  dfm <- get( paste0( prefix , yr , "1x" ) )
+  
+  # and create a new column called 'qtr' with all ones
+  dfm$qtr <- 1
+  
+  # loop through the second, third, and fourth fmli data frames
+  for ( i in 2:4 ){
+    
+    # copy each quarter into a new data frame called 'x'
+    x <- get( paste0( prefix , yr , i ) )
+    
+    # add a quarter variable (2, 3, then 4)
+    x$qtr <- i
+    
+    # stack 'x' below what's already in the fmly data table
+    # ..this stacks quarters 2, 3, and 4 below quarter 1
+    dfm <- rbind.fill( dfm , x )
+  }
+  
+  # repeat the steps above on the fifth quarter (which uses the following year's first quarter of data)
+  x <- get( paste0( prefix , as.numeric( yr ) + 1 , "1" ) )
+  x$qtr <- 5
+  
+  # final stacking of the fifth quarter
+  dfm <- rbind.fill( dfm , x )
+  # now the 'fmly' data table contains everything needed for analyses
+  
+  # delete the temporary data frame from memory
+  rm( x )
+  
+  # also delete the data frames loaded by the five load() function calls above
+  rm( 
+    list = 
+      c( 
+        paste0( prefix , yr , "1x" ) , 
+        paste0( prefix , yr , 2:4 ) ,
+        paste0( prefix , as.numeric( yr ) + 1 , "1" )
+      )
+  )
+  # clear up RAM
+  gc()
+  return( dfm )  
+}
+#######################################################
+
 
 # set this number to the year you would like to analyze..
 year <- 2011
@@ -59,60 +122,8 @@ setwd( paste( getwd() , year , sep = "/" ) )
 # pull the last two digits of the year variable into a separate string
 yr <- substr( year , 3 , 4 )
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # read in the five quarters of family data files (fmli)
-
-# load all five R data files (.rda)
-load( paste0( "./intrvw/fmli" , yr , "1x.rda" ) )
-load( paste0( "./intrvw/fmli" , yr , "2.rda" ) )
-load( paste0( "./intrvw/fmli" , yr , "3.rda" ) )
-load( paste0( "./intrvw/fmli" , yr , "4.rda" ) )
-load( paste0( "./intrvw/fmli" , as.numeric( yr ) + 1 , "1.rda" ) )
-
-# save the first quarter's data frame into a new data frame called 'fmly'
-fmly <- get( paste0( "fmli" , yr , "1x" ) )
-
-# and create a new column called 'qtr' with all ones
-fmly$qtr <- 1
-
-# loop through the second, third, and fourth fmli data frames
-for ( i in 2:4 ){
-  
-  # copy each quarter into a new data frame called 'x'
-  x <- get( paste0( "fmli" , yr , i ) )
-  
-  # add a quarter variable (2, 3, then 4)
-  x$qtr <- i
-  
-  # stack 'x' below what's already in the fmly data table
-  # ..this stacks quarters 2, 3, and 4 below quarter 1
-  fmly <- rbind.fill( fmly , x )
-}
-
-# repeat the steps above on the fifth quarter (which uses the following year's first quarter of data)
-x <- get( paste0( "fmli" , as.numeric( yr ) + 1 , "1" ) )
-x$qtr <- 5
-
-# final stacking of the fifth quarter
-fmly <- rbind.fill( fmly , x )
-# now the 'fmly' data table contains everything needed for analyses
-
-# delete the temporary data frame from memory
-rm( x )
-
-# also delete the data frames loaded by the five load() function calls above
-rm( 
-  list = 
-    c( 
-      paste0( "fmli" , yr , "1x" ) , 
-      paste0( "fmli" , yr , 2:4 ) ,
-      paste0( "fmli" , as.numeric( yr ) + 1 , "1" )
-    )
-)
-
-# clear up RAM
-gc()
-
+fmly = load.intrvw( yr = yr, prefix = 'fmli' )
 
 # create a character vector containing 45 variable names (wtrep01, wtrep02, ... wtrep44 and finlwt21)
 wtrep <- c( paste0( "wtrep" , str_pad( 1:44 , 2 , pad = "0" ) ) , "finlwt21" )
@@ -132,7 +143,6 @@ fmly[ is.na( fmly$totalexp ) , "totalexp" ] <- 0
 # creating a new variable 'annexp' in the fmly data table
 fmly <- transform( fmly , annexp = totalexp * 4 )
 
-
 # the "CE macros.sas" file creates estimates that match the mse = TRUE option set here.
 # in order to match the sas software provided by the bureau of labor statistics, keep this set to TRUE
 
@@ -144,10 +154,8 @@ options( survey.replicates.mse = TRUE )
 
 # Stata svyset command notes can be found here: http://www.stata.com/help.cgi?svyset
 
-
 # add a column called 'one' to the fmly data table containing 1s throughout
 fmly$one <- 1
-
 
 # create the survey design as a balanced repeated replication survey object, 
 # with 44 replicate weights
@@ -157,12 +165,6 @@ fmly.design <-
     weights = ~finlwt21 , 
     data = fmly 
   )
-
-# after its creation, explore these attributes by typing the object into the console..
-# print a basic description of the replicate design
-fmly.design
-
-####### Here ends code by A. Damico. Now I'm adding my own code 
 
 # extract the sampling weights from fmly.design
 w = weights(fmly.design, 'sampling')
@@ -213,112 +215,9 @@ n = 1000 # will have duplicates if n > 6000 or so
 u = seq(from = 0, to = 1-1/n, by = 1/n)
 ind = cut(u, breaks=w.cumsum, labels=F, include.lowest=T)
 
+###########################################################
 # load the 5 mtbi files
-
-load.intrvw = function( yr, prefix ) {  
-  # add the ucc tables to R so that it can automatically look them up??
-  load( paste0( "./intrvw/", prefix, yr , "1x.rda" ) )
-  load( paste0( "./intrvw/", prefix, yr , "2.rda" ) )
-  load( paste0( "./intrvw/", prefix, yr , "3.rda" ) )
-  load( paste0( "./intrvw/", prefix, yr , "4.rda" ) )
-  load( paste0( "./intrvw/", prefix, as.numeric( yr ) + 1 , "1.rda" ) )
-  
-  # save the first quarter's data frame into a new data frame called 'fmly'
-  dfm <- get( paste0( prefix , yr , "1x" ) )
-  
-  # and create a new column called 'qtr' with all ones
-  dfm$qtr <- 1
-  
-  # loop through the second, third, and fourth fmli data frames
-  for ( i in 2:4 ){
-    
-    # copy each quarter into a new data frame called 'x'
-    x <- get( paste0( prefix , yr , i ) )
-    
-    # add a quarter variable (2, 3, then 4)
-    x$qtr <- i
-    
-    # stack 'x' below what's already in the fmly data table
-    # ..this stacks quarters 2, 3, and 4 below quarter 1
-    dfm <- rbind.fill( dfm , x )
-  }
-  
-  # repeat the steps above on the fifth quarter (which uses the following year's first quarter of data)
-  x <- get( paste0( prefix , as.numeric( yr ) + 1 , "1" ) )
-  x$qtr <- 5
-  
-  # final stacking of the fifth quarter
-  dfm <- rbind.fill( dfm , x )
-  # now the 'fmly' data table contains everything needed for analyses
-  
-  # delete the temporary data frame from memory
-  rm( x )
-  
-  # also delete the data frames loaded by the five load() function calls above
-  rm( 
-    list = 
-      c( 
-        paste0( prefix , yr , "1x" ) , 
-        paste0( prefix , yr , 2:4 ) ,
-        paste0( prefix , as.numeric( yr ) + 1 , "1" )
-      )
-  )
-  
-  # clear up RAM
-  gc()
-  return( dfm )  
-}
-
-# add the ucc tables to R so that it can automatically look them up??
-load( paste0( "./intrvw/mtbi" , yr , "1x.rda" ) )
-load( paste0( "./intrvw/mtbi" , yr , "2.rda" ) )
-load( paste0( "./intrvw/mtbi" , yr , "3.rda" ) )
-load( paste0( "./intrvw/mtbi" , yr , "4.rda" ) )
-load( paste0( "./intrvw/mtbi" , as.numeric( yr ) + 1 , "1.rda" ) )
-
-# save the first quarter's data frame into a new data frame called 'fmly'
-mtbi <- get( paste0( "mtbi" , yr , "1x" ) )
-
-# and create a new column called 'qtr' with all ones
-mtbi$qtr <- 1
-
-# loop through the second, third, and fourth fmli data frames
-for ( i in 2:4 ){
-  
-  # copy each quarter into a new data frame called 'x'
-  x <- get( paste0( "mtbi" , yr , i ) )
-  
-  # add a quarter variable (2, 3, then 4)
-  x$qtr <- i
-  
-  # stack 'x' below what's already in the fmly data table
-  # ..this stacks quarters 2, 3, and 4 below quarter 1
-  mtbi <- rbind.fill( mtbi , x )
-}
-
-# repeat the steps above on the fifth quarter (which uses the following year's first quarter of data)
-x <- get( paste0( "mtbi" , as.numeric( yr ) + 1 , "1" ) )
-x$qtr <- 5
-
-# final stacking of the fifth quarter
-mtbi <- rbind.fill( mtbi , x )
-# now the 'fmly' data table contains everything needed for analyses
-
-# delete the temporary data frame from memory
-rm( x )
-
-# also delete the data frames loaded by the five load() function calls above
-rm( 
-  list = 
-    c( 
-      paste0( "mtbi" , yr , "1x" ) , 
-      paste0( "mtbi" , yr , 2:4 ) ,
-      paste0( "mtbi" , as.numeric( yr ) + 1 , "1" )
-    )
-)
-
-# clear up RAM
-gc()
+mtbi = load.intrvw( yr = yr, prefix = 'mtbi' )
 
 
 
