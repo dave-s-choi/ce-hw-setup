@@ -169,45 +169,44 @@ fmly.design <-
 # extract the sampling weights from fmly.design
 w = weights(fmly.design, 'sampling')
 
-# select some interesting fields from CU identifiers
-field.names1 = c('newid', 'qintrvmo', 'qintrvyr')
+# CU identifiers
+cu.id = c('newid', 'qintrvmo', 'qintrvyr')
 
-# select some interesting fields from CU characteristics
-field.names2 = c('as_comp1', 'as_comp2', 'as_comp3', 'as_comp4', 'as_comp5', 'bls_urbn', 'cutenure','earncomp',  'fam_size', 'fam_type', 'inc_rank', 'no_earnr', 'num_auto', 'region', 'pov_cy', 'pov_py', 'childage', 'inclass')
+# CU characteristics
+cu.char1 = c('as_comp1', 'as_comp2', 'as_comp3', 'as_comp4', 'as_comp5', 'bls_urbn', 'cutenure','earncomp',  'fam_size', 'fam_type', 'inc_rank', 'no_earnr', 'num_auto', 'region', 'pov_cy', 'pov_py', 'childage', 'inclass')
 
-# from characteristics of reference person and spouse
-field.names3 = c('age_ref', 'marital1', 'ref_race', 'race2', 'sex_ref', 'sex2', 'high_edu')
+# characteristics of reference person and spouse
+cu.char2 = c('age_ref', 'marital1', 'ref_race', 'race2', 'sex_ref', 'sex2', 'high_edu')
 
 # work experience of reference person and spouse
-field.names4 = c('inc_hrs1', 'inc_hrs2', 'incnonw1', 'incnonw2', 'incomey1', 'incomey2', 'incweek1', 'incweek2', 'occucod1', 'occucod2')
+cu.workexp = c('inc_hrs1', 'inc_hrs2', 'incnonw1', 'incnonw2', 'incomey1', 'incomey2', 'incweek1', 'incweek2', 'occucod1', 'occucod2')
 
 # income and other sources of money
 # note: variable ends in 'x': raw survey data
-#       variable ends in 'm': the mean value of 5 imputations
-
-field.names5 = c('compensx', 'ffrmincx', 'fincatax', 'fincbtax', 'finincx', 'fnonfrmx', 'frretirx', 'fsalaryx', 'fssix', 'inclossa', 'inclossb', 'intearnx', 'othrincx', 'pensionx', 'unemplx', 'welfarex', 'chdothx', 'aliothx', 'foodsmpx', 'colplanx', 'insrfndx', 'lumpsumx', 'nonincmx', 'ptaxrfdx', 'saleincx', 'ssoverpx', 'chdlmpx')
+#       variable ends in 'm': the mean value of 5 imputations. I think we'll skip these.
+cu.income = c('compensx', 'ffrmincx', 'fincatax', 'fincbtax', 'finincx', 'fnonfrmx', 'frretirx', 'fsalaryx', 'fssix', 'inclossa', 'inclossb', 'intearnx', 'othrincx', 'pensionx', 'unemplx', 'welfarex', 'chdothx', 'aliothx', 'foodsmpx', 'colplanx', 'insrfndx', 'lumpsumx', 'nonincmx', 'ptaxrfdx', 'saleincx', 'ssoverpx', 'chdlmpx')
 
 # taxes
-field.names6 = c('famtfedx', 'fedrfndx', 'fedtaxx', 'fsltaxx', 'misctaxx', 'othrfndx', 'sloctaxx', 'slrfundx', 'taxpropx', 'tottxpdx')
+cu.taxes = c('famtfedx', 'fedrfndx', 'fedtaxx', 'fsltaxx', 'misctaxx', 'othrfndx', 'sloctaxx', 'slrfundx', 'taxpropx', 'tottxpdx')
 
 # retirement and pension deductions
-field.names7 = c('fgovretx', 'findretx', 'fjssdedx', 'fpripenx', 'frrdedx')
+cu.retpen = c('fgovretx', 'findretx', 'fjssdedx', 'fpripenx', 'frrdedx')
 
 # financial information
-field.names8 = c('bsinvstx', 'ckbkactx', 'compbnd', 'compbndx', 'compckg', 'compckgx', 'compowd', 'compowdx', 'compsav', 'compsavx', 'compsec', 'compsecx', 'monyowdx', 'purssecx', 'savacctx', 'secestx', 'sellsecx', 'setlinsx', 'usbndx', 'wdbsastx', 'wdbsgdsx')
+cu.invest = c('bsinvstx', 'ckbkactx', 'compbnd', 'compbndx', 'compckg', 'compckgx', 'compowd', 'compowdx', 'compsav', 'compsavx', 'compsec', 'compsecx', 'monyowdx', 'purssecx', 'savacctx', 'secestx', 'sellsecx', 'setlinsx', 'usbndx', 'wdbsastx', 'wdbsgdsx')
 
 # housing structure
-field.names9 = c('diracc', 'bathrmq', 'bedroomq', 'building', 'govtcost', 'hlfbathq', 'publhous', 'renteqvx', 'roomsq', 'st_hous', 'heatfuel', 'swimpool', 'waterht', 'aptment', 'ofstpark', 'windowac', 'cntralac', 'cooking', 'porch', 'unistrq', 'built')
+cu.home = c('diracc', 'bathrmq', 'bedroomq', 'building', 'govtcost', 'hlfbathq', 'publhous', 'renteqvx', 'roomsq', 'st_hous', 'heatfuel', 'swimpool', 'waterht', 'aptment', 'ofstpark', 'windowac', 'cntralac', 'cooking', 'porch', 'unistrq', 'built')
 
 # expenditure summaries 
 # note: indicies may need to change for 2010!
-field.names10 = names(fmly)[261:422]
+cu.expn = names(fmly)[261:422]
 
 # trip expenditures (not including vacation homes)
-field.names11 = names(fmly)[465:504]
+cu.trips = names(fmly)[465:504]
 
 # total outlays
-field.names12 = names(fmly)[545:584]
+cu.outlays = names(fmly)[545:584]
 
 # to do: sample from the weights, and link to the MTBI and ITBI files
 w.cumsum = c(0,cumsum(w))/sum(w)
@@ -215,10 +214,20 @@ n = 1000 # will have duplicates if n > 6000 or so
 u = seq(from = 0, to = 1-1/n, by = 1/n)
 ind = cut(u, breaks=w.cumsum, labels=F, include.lowest=T)
 
+# make some data frames
+
+fmly.id = fmly[ ind, c( cu.id, cu.char1, cu.char2, cu.home ) ]
+fmly.work = fmly[ ind, c( cu.id, cu.workexp, cu.income, cu.taxes, cu.retpen ) ]
+col1 = seq( from = 1, by = 2, to = length( cu.expn ) )
+col2 = seq( from = 2, by = 2, to = length( cu.expn ) )
+fmly.expn = fmly[ ind, cu.expn[col1] ] + fmly[ ind, cu.expn[col2] ] 
+str = names( fmly.expn )
+names(fmly.expn) = substr( str,  start = 1, stop = nchar(str)-2)
+fmly.expn = cbind( fmly[ ind, cu.id ], fmly.expn )
 ###########################################################
 # load the 5 mtbi files
 mtbi = load.intrvw( yr = yr, prefix = 'mtbi' )
-
+mtbi.samp = subset( mtbi, subset = ( newid %in% fmly.id$newid ) )
 
 
 
