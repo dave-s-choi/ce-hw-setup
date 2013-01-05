@@ -169,6 +169,10 @@ fmly.design <-
 # extract the sampling weights from fmly.design
 w = weights(fmly.design, 'sampling')
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# basically everything above is taken from scripts by a. damico
+# here we start dividing up the data into smaller pieces for future HW assignments
+
 # CU identifiers
 cu.id = c('newid', 'qintrvmo', 'qintrvyr')
 
