@@ -231,6 +231,8 @@ fmly.expn = cbind( fmly[ ind, cu.id ], fmly.expn )
 ###########################################################
 # load the 5 mtbi files
 mtbi = load.intrvw( yr = yr, prefix = 'mtbi' )
+
+# keep only purchases by newids which were sampled in fmly.id
 mtbi.samp = subset( mtbi, subset = ( newid %in% fmly.id$newid ) )
 
 
