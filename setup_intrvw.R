@@ -212,7 +212,7 @@ cu.trips = names(fmly)[465:504]
 # total outlays
 cu.outlays = names(fmly)[545:584]
 
-# to do: sample from the weights, and link to the MTBI and ITBI files
+# extract n records from the CE, sampled by their weights
 w.cumsum = c(0,cumsum(w))/sum(w)
 n = 1000 # will have duplicates if n > 6000 or so
 u = seq(from = 0, to = 1-1/n, by = 1/n)
